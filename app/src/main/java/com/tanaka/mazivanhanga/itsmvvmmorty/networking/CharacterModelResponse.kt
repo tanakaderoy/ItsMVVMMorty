@@ -1,4 +1,6 @@
-package com.tanaka.mazivanhanga.itsmvvmmorty.model
+package com.tanaka.mazivanhanga.itsmvvmmorty.networking
+
+import com.tanaka.mazivanhanga.itsmvvmmorty.model.Location
 
 data class CharacterModelResponse (
     val info: Info,
@@ -27,7 +29,3 @@ data class Result (
     val created: String
 )
 
-data class Location (
-    val name: String,
-    val url: String
-)
