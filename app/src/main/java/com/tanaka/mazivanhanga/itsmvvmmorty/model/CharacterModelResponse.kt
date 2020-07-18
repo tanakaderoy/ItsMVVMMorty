@@ -6,14 +6,14 @@ data class CharacterModelResponse (
 )
 
 data class Info (
-    val count: Long,
-    val pages: Long,
+    val count: Int,
+    val pages: Int,
     val next: String,
-    val prev: Any? = null
+    val prev: Int? = null
 )
 
 data class Result (
-    val id: Long,
+    val id: Int,
     val name: String,
     val status: String,
     val species: String,
