@@ -45,6 +45,7 @@ object RetrofitModule {
     }
 
     @Singleton
+    @Provides
     fun provideCharacterService(retrofit: Retrofit.Builder): ApiService {
         return retrofit.build().create(ApiService::class.java)
     }
