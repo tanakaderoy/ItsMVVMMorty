@@ -11,7 +11,7 @@ data class Info (
     val count: Int,
     val pages: Int,
     val next: String,
-    val prev: Int? = null
+    val prev: String? = null
 )
 
 data class Result (
