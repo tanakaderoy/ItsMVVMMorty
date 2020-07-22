@@ -1,6 +1,8 @@
 package com.tanaka.mazivanhanga.itsmvvmmorty.room
 
-import androidx.room.*
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.tanaka.mazivanhanga.itsmvvmmorty.model.Location
 
 
@@ -37,7 +39,7 @@ data class CharacterCacheEntity(
     @ColumnInfo(name = "image")
     val image: String,
 
-    @ColumnInfo(name = "episode")   
+    @ColumnInfo(name = "episode")
     val episode: List<String>,
 
     @ColumnInfo(name = "url")

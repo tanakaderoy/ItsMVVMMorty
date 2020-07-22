@@ -1,6 +1,5 @@
 package com.tanaka.mazivanhanga.itsmvvmmorty.networking
 
-import io.reactivex.Observable
 import io.reactivex.Single
 import retrofit2.Response
 import retrofit2.http.GET
@@ -15,5 +14,5 @@ interface ApiService {
     suspend fun getCharacters(@Query("page") page: Int): CharacterModelResponse
 
     @GET("character/")
-    fun getCharacterObservable(@Query("page") page:Int): Single<Response<CharacterModelResponse>>
+    fun getCharacterObservable(@Query("page") page: Int): Single<Response<CharacterModelResponse>>
 }

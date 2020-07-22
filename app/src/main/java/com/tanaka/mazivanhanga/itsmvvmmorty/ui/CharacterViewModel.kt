@@ -7,7 +7,6 @@ import com.tanaka.mazivanhanga.itsmvvmmorty.model.Character
 import com.tanaka.mazivanhanga.itsmvvmmorty.repository.MainRepository
 import com.tanaka.mazivanhanga.itsmvvmmorty.util.DataState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -28,10 +27,10 @@ constructor(
     val dataState: LiveData<DataState<List<Character>>>
         get() = _dataState
 
-    private val _characterDetail: MutableLiveData<DataState<Character>> = MutableLiveData()
+    private val _filteredDataState: MutableLiveData<DataState<List<Character>>> = MutableLiveData()
 
-    val characterDataState: LiveData<DataState<Character>>
-        get() = _characterDetail
+    val filteredDataState: LiveData<DataState<List<Character>>>
+        get() = _filteredDataState
 
     var page: Int = 0
     var id: Int = 1
@@ -46,12 +45,11 @@ constructor(
                         _dataState.value = it
                     }.launchIn(viewModelScope)
                 }
-                CharacterStateEvent.GetCharacterDetail -> {
-                    println("next character")
-                    mainRepository.getCharacterDetail(id).onEach {
-                        _characterDetail.value = it
+                CharacterStateEvent.GetFilteredCharacters -> {
+                    mainRepository.getFilterdCharacters(name = name).onEach {
+                        _filteredDataState.value = it
                     }.launchIn(viewModelScope)
-                    _characterDetail.value = null
+                    _dataState.value = null
                 }
                 CharacterStateEvent.None -> {
 //Nah Fam
@@ -65,6 +63,6 @@ constructor(
 
 sealed class CharacterStateEvent {
     object GetCharacterEvent : CharacterStateEvent()
-    object GetCharacterDetail : CharacterStateEvent()
+    object GetFilteredCharacters : CharacterStateEvent()
     object None : CharacterStateEvent()
 }

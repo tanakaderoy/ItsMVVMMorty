@@ -6,10 +6,8 @@ import com.tanaka.mazivanhanga.itsmvvmmorty.networking.NetworkMapper
 import com.tanaka.mazivanhanga.itsmvvmmorty.room.CacheMapper
 import com.tanaka.mazivanhanga.itsmvvmmorty.room.CharacterDao
 import com.tanaka.mazivanhanga.itsmvvmmorty.util.DataState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import java.lang.Exception
 
 
 /**
@@ -39,6 +37,19 @@ class MainRepository constructor(
         }
     }
 
+    suspend fun getFilterdCharacters(name: String): Flow<DataState<List<Character>>> = flow {
+        emit(DataState.Loading)
+        try {
+            println("getting filtered: $name")
+
+            val cachedCharacters = characterDao.getFilteredCharacters(name = name)
+            println(cachedCharacters)
+            emit(DataState.Success(characterCacheMapper.mapFromEntitiesList(cachedCharacters)))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(DataState.Error(e))
+        }
+    }
 
     suspend fun getCharacterDetail(id: Int): Flow<DataState<Character>> = flow {
         emit(DataState.Loading)

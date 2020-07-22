@@ -51,6 +51,4 @@ object RetrofitModule {
     }
 
 
-
-
 }

@@ -18,6 +18,9 @@ interface CharacterDao {
     @Query(value = "SELECT * FROM CHARACTERS")
     suspend fun getCharacters(): List<CharacterCacheEntity>
 
+    @Query(value = "SELECT * FROM CHARACTERS WHERE name LIKE :name")
+    suspend fun getFilteredCharacters(name: String): List<CharacterCacheEntity>
+
     @Query(value = "SELECT * FROM CHARACTERS WHERE id = :id")
     suspend fun getCharacter(id: Int): CharacterCacheEntity
 }

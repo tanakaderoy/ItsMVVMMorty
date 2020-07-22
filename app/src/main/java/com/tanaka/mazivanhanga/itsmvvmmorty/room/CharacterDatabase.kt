@@ -14,7 +14,7 @@ import com.tanaka.mazivanhanga.itsmvvmmorty.util.CustomTypeConverters
 @TypeConverters(CustomTypeConverters::class)
 abstract class CharacterDatabase : RoomDatabase() {
 
-    abstract fun characterDao() : CharacterDao
+    abstract fun characterDao(): CharacterDao
 
     companion object {
         val DATA_BASE_NAME: String = "character_db"

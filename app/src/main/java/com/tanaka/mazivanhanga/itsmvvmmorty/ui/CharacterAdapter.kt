@@ -6,8 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -18,27 +17,29 @@ import com.tanaka.mazivanhanga.itsmvvmmorty.model.Character
 /**
  * Created by Tanaka Mazivanhanga on 07/18/2020
  */
-class CharacterAdapter(val context: Context, val onItemTouchListener: OnItemTouchListener) :
-    PagedListAdapter<Character, CharacterAdapter.ViewHolder>(DIFF_CALLBACK) {
-
-
+class CharacterAdapter(val context: Context, private val onItemTouchListener: OnItemTouchListener) :
+    RecyclerView.Adapter<CharacterAdapter.ViewHolder>() {
     companion object {
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Character>() {
+        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Character>() {
             override fun areItemsTheSame(oldItem: Character, newItem: Character): Boolean {
                 return oldItem.id == newItem.id
             }
 
             override fun areContentsTheSame(oldItem: Character, newItem: Character): Boolean {
-                return oldItem.id == newItem.id
+                return oldItem == newItem
             }
 
         }
     }
 
 
-    override fun getItemCount(): Int {
-        return super.getItemCount()
+    fun submitList(characters: List<Character>) {
+        differ.submitList(characters)
     }
+
+    var differ = AsyncListDiffer<Character>(this, DIFF_CALLBACK)
+
+    override fun getItemCount(): Int = differ.currentList.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.character_list_item, parent, false)
@@ -46,15 +47,10 @@ class CharacterAdapter(val context: Context, val onItemTouchListener: OnItemTouc
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val character = getItem(position)
-        if (character != null) {
-            holder.character = character
-            holder.onItemTouchListener = onItemTouchListener
-            Glide.with(context).load(character.image).into(holder.characterImageView)
-            holder.characterNameTextView.text = character.name
-        } else {
-            Toast.makeText(context, "Failed to get Item", Toast.LENGTH_SHORT).show()
-        }
+        val character = differ.currentList[position]
+        holder.onItemTouchListener = onItemTouchListener
+        holder.bindView(character)
+
     }
 
 
@@ -66,14 +62,21 @@ class CharacterAdapter(val context: Context, val onItemTouchListener: OnItemTouc
 
         var characterImageView: ImageView = itemView.findViewById(R.id.character_image)
         var characterNameTextView: TextView = itemView.findViewById(R.id.character_name)
+
+        fun bindView(character: Character) {
+            this.character = character
+            Glide.with(context).load(character.image).into(characterImageView)
+            characterNameTextView.text = character.name
+        }
+
         init {
-            itemView.setOnClickListener{
+            itemView.setOnClickListener {
                 onItemTouchListener.onClicked(character = character)
             }
         }
     }
 }
 
-interface OnItemTouchListener{
+interface OnItemTouchListener {
     fun onClicked(character: Character)
 }

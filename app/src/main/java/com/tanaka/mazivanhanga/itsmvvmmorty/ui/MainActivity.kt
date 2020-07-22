@@ -2,100 +2,168 @@ package com.tanaka.mazivanhanga.itsmvvmmorty.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.tanaka.mazivanhanga.itsmvvmmorty.R
 import com.tanaka.mazivanhanga.itsmvvmmorty.model.Character
 import com.tanaka.mazivanhanga.itsmvvmmorty.util.DataState
 import dagger.hilt.android.AndroidEntryPoint
-import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val TAG = MainActivity::class.simpleName
     private val viewModel: CharacterViewModel by viewModels()
-    private val onItemTouchListener = object : OnItemTouchListener {
-        override fun onClicked(character: Character) {
-            println("Clicked on ${character.name}")
-            val bottomSheet = CharacterDetailBottomSheetDialog
-            bottomSheet.character = character
-            bottomSheet.show(supportFragmentManager, TAG)
-        }
+    var characters = ArrayList<Character>()
+    var page = 1
+    private val characterAdapter = CharacterAdapter(this, getOnItemTouchListener())
 
+    companion object {
+        private const val MAX_PAGES = 31
+        private const val MAX_CHARACTERS = 591
     }
-    private val characterAdapter = CharacterAdapter(this, onItemTouchListener)
-    lateinit var newCharacterViewModel: NewCharacterViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.setHasFixedSize(true)
-        newCharacterViewModel = ViewModelProviders.of(this).get(NewCharacterViewModel::class.java)
+        initViews()
+        subscribeObservers()
 
-        newCharacterViewModel.initialize(this, viewModel, onProgress)
-        newCharacterViewModel.characterPagedList.observe(this, Observer {
-            characterAdapter.submitList(it)
-        })
+        viewModel.page = page
+        initialGetCharacters()
 
-        recyclerView.adapter = characterAdapter
 
     }
 
-   private val onProgress = object : CharacterDataSource.OnProgress {
-        override fun displayProgressBar(shouldDisplay: Boolean) {
-            CoroutineScope(Main).launch {
-                this@MainActivity.displayProgressBar(shouldDisplay)
+    private fun initialGetCharacters() {
+        if (characters.isEmpty()) {
+            viewModel.setStateEvent(CharacterStateEvent.GetCharacterEvent)
+        }
+    }
+
+    private fun getOnScrollListener(): RecyclerView.OnScrollListener {
+        return object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (page < MAX_PAGES || characters.size < MAX_CHARACTERS) {
+                        page++
+                        viewModel.page = page
+                        viewModel.setStateEvent(CharacterStateEvent.GetCharacterEvent)
+
+                        Log.d(TAG, "Should call for more")
+
+                    } else {
+                        Log.d(TAG, "no need to call")
+                    }
+
+                }
+            }
+        }
+    }
+
+    private fun initViews() {
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.setHasFixedSize(true)
+        recyclerView.adapter = characterAdapter
+        filter_edit_text.addTextChangedListener(getTextWatcher())
+        filter_edit_text.onFocusChangeListener = getOnFocusChangeListener()
+        button.setOnClickListener {
+            viewModel.name = "%${filter_edit_text.text}%"
+            filter_edit_text.clearFocus()
+            viewModel.setStateEvent(CharacterStateEvent.GetFilteredCharacters)
+        }
+        recyclerView.addOnScrollListener(getOnScrollListener())
+    }
+
+    private fun getOnFocusChangeListener(): View.OnFocusChangeListener {
+        return View.OnFocusChangeListener { v, hasFocus ->
+            if (v?.id == R.id.filter_edit_text && !hasFocus) {
+                val imm: InputMethodManager =
+                    getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(v.windowToken, 0)
+            }
+        }
+    }
+
+    private fun getTextWatcher(): TextWatcher {
+        return object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.name = "%${s.toString()}%"
+                viewModel.setStateEvent(CharacterStateEvent.GetFilteredCharacters)
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+        }
+    }
+
+    private fun getOnItemTouchListener(): OnItemTouchListener {
+        return object : OnItemTouchListener {
+            override fun onClicked(character: Character) {
+                println("Clicked on ${character.name}")
+                val bottomSheet = CharacterDetailBottomSheetDialog
+                bottomSheet.character = character
+                bottomSheet.show(supportFragmentManager, TAG)
             }
 
         }
-
-        override fun displayError(message: String?) {
-            CoroutineScope(Main).launch {
-                this@MainActivity.displayError(message)
-
-            }
-        }
-
-        override fun getContext(): Context {
-            return this@MainActivity
-        }
-
-       override fun clearDisposable(compositeDisposable: CompositeDisposable) {
-          compositeDisposable.clear()
-       }
-
-   }
+    }
 
 
     private fun subscribeObservers() {
-        viewModel.characterDataState.observe(this, Observer {
+        viewModel.dataState.observe(this, Observer {
             when (it) {
-                is DataState.Success<Character> -> {
+                is DataState.Success<List<Character>> -> {
                     displayProgressBar(false)
-                    println("Got Character detail ${it.data.name}")
+                    println("Got Characters ${it.data}")
+                    characters = it.data as ArrayList<Character>
+                    if (characters.size == MAX_CHARACTERS) page = MAX_PAGES
+                    characterAdapter.submitList(it.data)
                 }
                 is DataState.Error -> {
                     displayProgressBar(false)
                     displayError(it.exception.message)
                 }
                 is DataState.Loading -> {
-                    displayProgressBar(true)
+                    displayProgressBar(false)
+                }
+            }
+        })
+
+        viewModel.filteredDataState.observe(this, Observer {
+            when (it) {
+                is DataState.Success<List<Character>> -> {
+                    displayProgressBar(false)
+                    println("Got filtered characters ${it.data}")
+                    characterAdapter.submitList(it.data)
+                    page++
+                }
+                is DataState.Error -> {
+                    displayProgressBar(false)
+                    displayError(it.exception.message)
+                }
+                is DataState.Loading -> {
+                    displayProgressBar(false)
                 }
             }
         })
@@ -103,11 +171,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun displayError(message: String?) {
         var error = ""
-        if (message != null) {
-            error = message
-        } else {
-            error = "Unkown Error"
-        }
+        error = message ?: "Unkown Error"
         Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
     }
 

@@ -10,7 +10,7 @@ import javax.inject.Inject
  */
 class CacheMapper
 @Inject
-constructor(): EntityMapper<CharacterCacheEntity, Character>{
+constructor() : EntityMapper<CharacterCacheEntity, Character> {
     override fun mapFromEntity(entity: CharacterCacheEntity): Character {
         return Character(
             id = entity.id,
@@ -45,7 +45,7 @@ constructor(): EntityMapper<CharacterCacheEntity, Character>{
         )
     }
 
-    fun mapFromEntitiesList(entities: List<CharacterCacheEntity>): List<Character>{
+    fun mapFromEntitiesList(entities: List<CharacterCacheEntity>): List<Character> {
         return entities.map { mapFromEntity(it) }
     }
 }

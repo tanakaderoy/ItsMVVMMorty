@@ -8,5 +8,5 @@ import dagger.hilt.android.HiltAndroidApp
  * Created by Tanaka Mazivanhanga on 07/18/2020
  */
 @HiltAndroidApp
-class MyApplication: Application() {
+class MyApplication : Application() {
 }

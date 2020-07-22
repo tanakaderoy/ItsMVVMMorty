@@ -10,7 +10,6 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.tanaka.mazivanhanga.itsmvvmmorty.R
 import com.tanaka.mazivanhanga.itsmvvmmorty.model.Character
-import kotlinx.android.synthetic.main.character_detail_bottom_sheet_layout.*
 
 
 /**
