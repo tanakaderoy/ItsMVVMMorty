@@ -182,6 +182,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun displayProgressBar(isDisplayed: Boolean) {
-         binding.progressBar.visibility = if (isDisplayed) VISIBLE else GONE
+        binding.progressBar.visibility = if (isDisplayed) VISIBLE else GONE
     }
 }

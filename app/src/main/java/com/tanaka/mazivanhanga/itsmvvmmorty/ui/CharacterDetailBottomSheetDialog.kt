@@ -24,7 +24,7 @@ object CharacterDetailBottomSheetDialog : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = CharacterDetailBottomSheetLayoutBinding.inflate(inflater,container,false)
+        _binding = CharacterDetailBottomSheetLayoutBinding.inflate(inflater, container, false)
         return binding.root
     }
 

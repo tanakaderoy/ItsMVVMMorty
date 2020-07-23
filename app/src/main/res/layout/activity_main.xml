@@ -34,6 +34,7 @@
         android:layout_width="0dp"
         android:layout_height="52dp"
         android:ems="10"
+        android:hint="@string/filter_characters"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toStartOf="@+id/button"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,7 +44,7 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Search"
+        android:text="@string/search"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">It\'s MVVM Morty</string>
+    <string name="filter_characters">Filter Characters...</string>
+    <string name="search">Search</string>
+    <string name="name_label">Name:</string>
+    <string name="rick_sanchez">Rick Sanchez</string>
+    <string name="species_label">Species:</string>
+    <string name="human">Human</string>
+    <string name="status_label">Status:</string>
+    <string name="alive">Alive</string>
+    <string name="image_descr">Image</string>
+    <string name="gender_label">Gender:</string>
+    <string name="male">Male</string>
+    <string name="location_label">Location:</string>
+    <string name="earth">Earth</string>
 </resources>
