@@ -16,11 +16,12 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.tanaka.mazivanhanga.itsmvvmmorty.R
+import com.tanaka.mazivanhanga.itsmvvmmorty.databinding.ActivityMainBinding
 import com.tanaka.mazivanhanga.itsmvvmmorty.model.Character
 import com.tanaka.mazivanhanga.itsmvvmmorty.util.DataState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity() {
     var characters = ArrayList<Character>()
     var page = 1
     private val characterAdapter = CharacterAdapter(this, getOnItemTouchListener())
+    private lateinit var binding: ActivityMainBinding
 
     companion object {
         private const val MAX_PAGES = 31
@@ -39,10 +41,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
-        initViews()
+        initViews(binding)
         subscribeObservers()
 
         viewModel.page = page
@@ -78,18 +81,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initViews() {
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.setHasFixedSize(true)
-        recyclerView.adapter = characterAdapter
-        filter_edit_text.addTextChangedListener(getTextWatcher())
-        filter_edit_text.onFocusChangeListener = getOnFocusChangeListener()
-        button.setOnClickListener {
-            viewModel.name = "%${filter_edit_text.text}%"
-            filter_edit_text.clearFocus()
-            viewModel.setStateEvent(CharacterStateEvent.GetFilteredCharacters)
+    private fun initViews(binding: ActivityMainBinding) {
+        binding.apply {
+            recyclerView.layoutManager = StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL)
+            recyclerView.setHasFixedSize(true)
+            recyclerView.adapter = characterAdapter
+            filterEditText.addTextChangedListener(getTextWatcher())
+            filterEditText.addTextChangedListener(getTextWatcher())
+            filterEditText.onFocusChangeListener = getOnFocusChangeListener()
+            button.setOnClickListener {
+                viewModel.name = "%${filterEditText.text}%"
+                filterEditText.clearFocus()
+                viewModel.setStateEvent(CharacterStateEvent.GetFilteredCharacters)
+            }
+            recyclerView.addOnScrollListener(getOnScrollListener())
         }
-        recyclerView.addOnScrollListener(getOnScrollListener())
     }
 
     private fun getOnFocusChangeListener(): View.OnFocusChangeListener {
@@ -176,6 +182,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun displayProgressBar(isDisplayed: Boolean) {
-        progressBar.visibility = if (isDisplayed) VISIBLE else GONE
+         binding.progressBar.visibility = if (isDisplayed) VISIBLE else GONE
     }
 }

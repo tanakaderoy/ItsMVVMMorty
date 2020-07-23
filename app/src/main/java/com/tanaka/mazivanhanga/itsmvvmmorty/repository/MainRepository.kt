@@ -51,15 +51,4 @@ class MainRepository constructor(
         }
     }
 
-    suspend fun getCharacterDetail(id: Int): Flow<DataState<Character>> = flow {
-        emit(DataState.Loading)
-        try {
-            val cachedCharacter = characterDao.getCharacter(id)
-            val character = characterCacheMapper.mapFromEntity(cachedCharacter)
-            emit(DataState.Success(character))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emit(DataState.Error(e))
-        }
-    }
 }
